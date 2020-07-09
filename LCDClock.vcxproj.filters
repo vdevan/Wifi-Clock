@@ -23,6 +23,8 @@
     <None Include="Storage.ino" />
     <None Include="HTMLhandlers.ino" />
     <None Include="Clock.ino" />
+    <None Include="LICENSE" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.LCDClock.vsarduino.h">

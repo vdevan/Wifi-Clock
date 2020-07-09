@@ -117,6 +117,8 @@
     <None Include="LCDClock.ino">
       <FileType>CppCode</FileType>
     </None>
+    <None Include="LICENSE" />
+    <None Include="README.md" />
     <None Include="Storage.ino">
       <FileType>CppCode</FileType>
     </None>
