@@ -120,6 +120,23 @@ int getDST(int Hour)
         return 1;        
     }
   }
+  
+  //Current month is DST end month
+  if (currentMonth == currentDST.endMonth)
+  {
+    if (currentDate < currentDST.endDate)
+      return 1;
+    if (currentDate > currentDST.endDate)
+      return 0;
+    if (currentDate == currentDST.endDate)
+    {
+      if (Hour < currentDST.endTime)
+        return 1;
+      else
+        return 0;        
+    }
+  }
+  return 0;
 }
 
 //Calendar month calculated from epoch
