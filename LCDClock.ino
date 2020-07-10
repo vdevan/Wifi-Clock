@@ -30,13 +30,13 @@
 
 
 //RTC Pins
-#define RTC_SDA 4
-#define RTC_SDC 5
+#define RTC_SDA 4 //D2
+#define RTC_SCL 5 //D1
 RTC_DS3231 rtc;
 
 //Wifi Clock requirements
-#define REG_SEL 0  //D1
-#define ENABLE 2  //D2
+#define REG_SEL 0  //D3
+#define ENABLE 2  //D4
 #define DATA4  14  //D5
 #define DATA5  12  //D6
 #define DATA6  13 //D7
@@ -178,11 +178,14 @@ void setup()
 
     clockIP = IPAddress(172, 23, pref.ClockID, 1);
    
-    //RTC Debug & testing
-    /* Comment out after testing*/
+
     if (!rtc.begin())
         Serial.println("Couldn't find RTC");
+    
+    //RTC Debug & testing
+    /* Comment out after testing* /    
     rtc.adjust(DateTime(epoch)); //Store the value in rtc for DST testing
+    epoch = (rtc.now()).unixtime();
 
     /* End of testing */
     
@@ -192,10 +195,6 @@ void setup()
     delay(500);
     Serial.print("Clock IP address: ");
     Serial.println(WiFi.softAPIP());
-
-    epoch = (rtc.now()).unixtime();
-
- 
 
     lcd.begin(16,2);
     lcd.clear();
@@ -216,8 +215,6 @@ void setup()
     //Need to go through the entire Networks for stored connections
     if (storedNetworks > 0); // Request WLAN connect if there is a SSID
         connectWifi();
-
-
 
     //Server will be started at the power-on or config button used
     if (!bConnect)

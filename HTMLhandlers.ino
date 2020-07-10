@@ -79,6 +79,7 @@ void storeEpoch(String st)
     server.send(200, "text/plain", "Clock Updated"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
     epoch += (millis()-tick)/1000;
     currentHour = 25;
+    InitialiseDST();
     elapsedTime = millis();
     updateInterval = millis();
 }
@@ -147,6 +148,7 @@ void handleWifiSave()
 
       //Serial.printf("storage offset to be stored: %d\n Original stored SSID length: %d\n", offset, strlen(Networks[offset].SSID));
       storeEpoch(server.arg("save"));
+
       saveCredentials(false);    
 }
 
