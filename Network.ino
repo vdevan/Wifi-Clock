@@ -33,13 +33,12 @@ void connectWifi()
     {           
         lcd.setCursor(15,0);
         lcd.write(byte(0));
-        NTPUpdate(false);
+        NTPUpdate();
     }
     else
     {
        lcd.setCursor(15,0);
        lcd.write(byte(1));
-       epoch += (millis()-tick)/1000;
        elapsedTime = millis();
        updateInterval = millis();
     }
@@ -87,10 +86,6 @@ void startServer()
     }
     bServer = true;
     serverTimeout = millis();
-    epoch = (rtc.now()).unixtime();
-        
-    //lcd.setCursor(0, 1);
-    //lcd.print(" Settings Req. ");
 }
 
 void sendNTPPacket() 
@@ -115,10 +110,11 @@ void sendNTPPacket()
     ntpUDP.endPacket();
 }
 
-bool NTPUpdate(bool bUpdate)
+bool NTPUpdate()
 {
     if (bConnect)
     {
+      tick = millis();
       sendNTPPacket();
       // Wait till data is there or timeout...
       byte timeout = 0;
@@ -140,14 +136,12 @@ bool NTPUpdate(bool bUpdate)
       // combine the four bytes (two words) into a long integer
       // this is NTP time (seconds since Jan 1 1900):
       unsigned long secsSince1900 = highWord << 16 | lowWord;
+      unsigned long epoch;
       epoch = secsSince1900 - seventyYears;
       epoch += pref.DSTZone;
-      
-      if (bUpdate)
-        rtc.adjust(DateTime(epoch)); //Store the value in rtc
+      epoch += (millis()-tick)/1000; //adjust the clock for time elapsed
+      rtc.adjust(DateTime(epoch)); //Store the value in rtc
     }
-    else
-      epoch = (rtc.now()).unixtime();
         
     elapsedTime = millis();
     updateInterval = millis();

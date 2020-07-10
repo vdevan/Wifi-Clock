@@ -53,7 +53,6 @@ void handleRoot()
 
 void storeEpoch(String st)
 {
-    unsigned long tick = millis();
     char str[17];
     int index = st.indexOf('t');
     String temp = st.substring(index+1); 
@@ -62,7 +61,7 @@ void storeEpoch(String st)
     st.toCharArray(str,sizeof(str));
 
 
-    epoch = strtoul(str,NULL,10);
+    unsigned long epoch = strtoul(str,NULL,10);
 
     
 
@@ -75,18 +74,21 @@ void storeEpoch(String st)
     }
 
     epoch += pref.DSTZone;
-    rtc.adjust(DateTime(epoch));
     server.send(200, "text/plain", "Clock Updated"); // Send HTTP status 404 (Not Found) when there's no handler for the URI in the request
-    epoch += (millis()-tick)/1000;
-    currentHour = 25;
-    InitialiseDST();
+    
+    epoch += (millis()-tick)/1000; //adjust the clock for time elapsed
+    
+    currentHour = 25; //force display date
+    rtc.adjust(DateTime(epoch));
     elapsedTime = millis();
     updateInterval = millis();
+    InitialiseDST();
 }
 
 void handleTime()
 {
   //Serial.printf("Received from client: %s\n",server.arg("time").c_str());
+  tick = millis(); //keep track of time
   storeEpoch(server.arg("time"));
 }
 
@@ -94,12 +96,13 @@ void handleTime()
 void handleWifiSave()
 {
     //Serial.println("wifi save");
+
     String st;
     int offset = 0;
     if (server.hasArg("reset"))
     {
       sendResponse();
-      storeEpoch(server.arg("reset"));
+      //storeEpoch(server.arg("reset"));
       return;
     }
     if (server.hasArg("del")) //handle delete
@@ -147,7 +150,7 @@ void handleWifiSave()
       sendResponse();
 
       //Serial.printf("storage offset to be stored: %d\n Original stored SSID length: %d\n", offset, strlen(Networks[offset].SSID));
-      storeEpoch(server.arg("save"));
+      //storeEpoch(server.arg("save"));
 
       saveCredentials(false);    
 }
@@ -163,7 +166,7 @@ void handlePrefSave()
     if (server.hasArg("reset"))
     {
       sendResponse();
-      storeEpoch(server.arg("reset"));
+      //storeEpoch(server.arg("reset"));
       return;
     }
     else
@@ -209,7 +212,7 @@ void handlePrefSave()
             //pref.DSTStartMonth, pref.DSTStartDay, pref.DSTStartWeek, pref.DSTStartTime, pref.DSTEndMonth, pref.DSTEndDay, pref.DSTEndWeek, pref.DSTEndTime);
 
         sendResponse();
-        storeEpoch(server.arg("save"));
+        //storeEpoch(server.arg("save"));
 
         saveCredentials(false);
     }

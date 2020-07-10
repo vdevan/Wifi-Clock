@@ -22,7 +22,7 @@
 #define WIFI_TIMEOUT    8                   //Time out in secs for Wifi connection. Will affect clock performance if long
 #define SERVER_ON_TIME  10                  //Server On Time in mins after reset before reverting to clock. 0 is indefinite 
 #define CLOCK_ID    1                       //default clock id.
-#define UPDATEINTERVAL  600000L             //in milli seconds. This will update with NTP Server every 10 minutes
+#define UPDATEINTERVAL  1800000L             //in milli seconds. This will update with NTP Server every 30 minutes
 #define DIGITAL_UPDATE  60000               //Minute update for Digital clock
 #define LCD_UPDATE      1000                //Seconds update for LCD Display
 #define NTP_PACKET_SIZE 48                  //Default NTP Packet size
@@ -51,11 +51,6 @@ const unsigned long seventyYears = 2208988800UL; //1900 - 1970 seconds
 byte packetBuffer[NTP_PACKET_SIZE];
 
 //Calendar details
-static const uint DAYS[2][13] =
-{
-    {0,31,59,90,120,151,181,212,243,273,304,334,365}, // 365 days, non-leap
-    {0,31,60,91,121,152,182,213,244,274,305,335,366}  // 366 days, leap
-};
 char WEEK[7][5] = { "Sun ", "Mon ", "Tue ", "Wed ", "Thu ", "Fri ", "Sat " };
 char MONTHS[12][6] = { " JAN ", " FEB ", " MAR ", " APR ", " MAY ", " JUN ", " JUL ", " AUG ", " SEP ", " OCT ", " NOV ", " DEC " };
 static const int MonthTable[]{ 0,3,2,5,0,3,5,1,4,6,2,4 };
@@ -116,15 +111,15 @@ int storageIndex;
 int storedNetworks;
 
 //time requirements
-unsigned long epoch;
-int secs = 0;
-int mins = 0;
-int currentHour = 25;
-int currentMonth = 0;
-int currentDate = 0;
-int currentDay = 0;
-int runningYear=0;
-int currentYear=0;
+unsigned long tick;
+uint8_t secs = 0;
+uint8_t mins = 0;
+uint8_t currentHour = 25;
+uint8_t currentMonth = 0;
+uint8_t currentDate = 0;
+uint8_t currentDay = 0;
+uint8_t runningYear=0;
+uint16_t currentYear=0;
 
 //LCD  & HW variables
 LiquidCrystal lcd(REG_SEL,ENABLE,DATA4,DATA5,DATA6,DATA7);
@@ -184,9 +179,8 @@ void setup()
     
     //RTC Debug & testing
     /* Comment out after testing* /    
-    rtc.adjust(DateTime(epoch)); //Store the value in rtc for DST testing
-    epoch = (rtc.now()).unixtime();
-
+    rtc.adjust(DateTime(1593639258)); //Store the value in rtc for DST testing
+ 
     /* End of testing */
     
     
@@ -271,7 +265,6 @@ void loop()
     //Displaytime
     if (millis() - elapsedTime > LCD_UPDATE)//change to LCD_UPDATE after testing
     {
-        epoch += (millis() - elapsedTime)/1000;
         elapsedTime = millis();
         displayTime();
     }
@@ -313,6 +306,6 @@ void loop()
     }
     MonitorConfigPin();
     if (millis() - updateInterval > UPDATEINTERVAL)
-      NTPUpdate(true);
+      NTPUpdate();
  
 }

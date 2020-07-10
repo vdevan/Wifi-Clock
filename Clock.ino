@@ -1,7 +1,7 @@
 void displayTime()
 {
   String s;
-  int hrs = getHours();
+  int hrs = rtc.now().hour();
   if (hrs != currentHour)
   {
     //We will display the days and year first. This will ensure time cycles are not wasted 
@@ -29,14 +29,15 @@ void displayTime()
     s =  hrs < 10 ? "0" + String(hrs) : String(hrs);
       
     s+= ":";
-    mins = getMinutes();
+    mins = rtc.now().minute(); 
     s+= mins < 10 ? "0" + String(mins) : String(mins);
     s+= ":";
-    secs = getSeconds();
+    secs = rtc.now().second();
     s += secs < 10 ? "0" + String(secs) : String(secs);
     s += AM;
     lcd.setCursor(pref.bAMPM ? 2 : 4,0);
     lcd.print(s);
+
     //if (bConnect)
         //Serial.printf("Current Time: %s\n", timeClient.getFormattedTime().c_str());
     //else
@@ -44,14 +45,14 @@ void displayTime()
   }
   else
   {
-    int minutes = getMinutes();
+    int minutes = rtc.now().minute();
     if (minutes != mins)
     {
       mins = minutes;
       s = mins < 10 ? "0" + String(mins) : String(mins);
       s += ":";
       
-      secs = getSeconds();
+      secs = rtc.now().second();
       s += secs < 10 ? "0" + String(secs) : String(secs);
 
       lcd.setCursor(pref.bAMPM ? 5 : 7,0);
@@ -65,38 +66,13 @@ void displayTime()
     else
     {
       lcd.setCursor(pref.bAMPM ? 8 :10,0);
-      secs = getSeconds();
+      secs = rtc.now().second();
       lcd.print(secs < 10 ? "0" + String(secs) : String(secs));
      }
   }
     
 }
 
-int getDay()
-{
-  return ((((epoch) / 86400L) + 4 ) % 7);
-}
-
-int getSeconds()
-{
-  return ((epoch) % 60);
-}
-
-int getMinutes()
-{
-  return ((epoch) % 3600) / 60;  
-}
-
-int getHours()
-{
-  return ((epoch) % 86400L) / 3600;  
-}
-
-unsigned long getEpochTime()
-{
-    return epoch; 
-
-}
 
 //Check if the time falls under DST
 int getDST(int Hour)
@@ -139,19 +115,6 @@ int getDST(int Hour)
   return 0;
 }
 
-//Calendar month calculated from epoch
-int GetMonth(int leap, int Day)
-{
-    int Month = 0;
-    for (int i = 0; i < 13; i++)
-    {
-        if (DAYS[leap][i] >= Day)
-            break;
-        Month++;
-    }
-    return Month;
-}
-
 
 //Given date, month, year calculates the day and returns. Sunday is  0, Monday is 1 ...
 int getWeekDay(int d, int m, int y)
@@ -165,10 +128,7 @@ int getWeekDay(int d, int m, int y)
 //Called at the start of the year, will fill the DST structure
 void InitialiseDST()
 {
-  //startAEST[] = {10,0,1,2};
-  //0 = StartMonth, 1= StartDay 2= StartWeek 3 = StartTime
-
-
+  
   //Get the weekday of the first date of DST Start month
   int firstDayOfWeek = getWeekDay(1,pref.DSTStartMonth,currentYear);
   
@@ -212,16 +172,10 @@ void InitialiseDST()
 //Displays the date on the second line of LCD
 void displayDate()
 {
-    unsigned long currentEpoch = getEpochTime(); //elapsed time since 1/1/1970
-    int DaysElapsed = floor(currentEpoch / (60 * 60 * 24)); //total seconds in a day
-    int YearElapsed = floor(DaysElapsed + 0.5) / 365.25;
-    currentYear = 1970 + YearElapsed;
-
-    int DayPosition = floor(DaysElapsed - (YearElapsed * 365.25) + 1.5);
-    int isLeap = currentYear % 4 == 0 ? 1 : 0;
-    currentMonth = GetMonth(isLeap, DayPosition);
-    currentDate = DayPosition - DAYS[isLeap][currentMonth - 1];
-    currentDay = getDay();
+    currentYear = rtc.now().year();
+    currentMonth = rtc.now().month();
+    currentDate = rtc.now().day();
+    currentDay = rtc.now().dayOfTheWeek();
     
 
     lcd.setCursor(0, 1);
