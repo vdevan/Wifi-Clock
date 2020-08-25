@@ -22,7 +22,7 @@
 #define WIFI_TIMEOUT    8                   //Time out in secs for Wifi connection. Will affect clock performance if long
 #define SERVER_ON_TIME  10                  //Server On Time in mins after reset before reverting to clock. 0 is indefinite 
 #define CLOCK_ID    1                       //default clock id.
-#define UPDATEINTERVAL  1800000L             //in milli seconds. This will update with NTP Server every 30 minutes
+#define UPDATEINTERVAL  600000UL             //in milli seconds. This will update with NTP Server every 10 minutes
 #define DIGITAL_UPDATE  60000               //Minute update for Digital clock
 #define LCD_UPDATE      1000                //Seconds update for LCD Display
 #define NTP_PACKET_SIZE 48                  //Default NTP Packet size
@@ -159,6 +159,9 @@ unsigned long lastConnectTry = 0;
 unsigned long updateInterval = 0;
 unsigned long elapsedTime = 0;    //should be used for secs instead of delay(1);
 
+//Testing for NTPUpdate
+//int test = 10; //10 seconds to change the time
+
 void setup()
 {
     delay(1000);
@@ -180,9 +183,8 @@ void setup()
     //RTC Debug & testing
     /* Comment out after testing* /    
     rtc.adjust(DateTime(1593639258)); //Store the value in rtc for DST testing
- 
     /* End of testing */
-    
+   
     
     WiFi.softAPConfig(clockIP, clockIP, netMsk);
     WiFi.softAP(clockSSID.c_str(), pref.ClockPassword);
@@ -229,7 +231,7 @@ void MonitorConfigPin()
     if (digitalRead(RESET) == HIGH)
         return;
     int elapse = 0;
-    //Serial.println("Detected Config Request");
+    Serial.printf("Detected Config Request\n");
     while (digitalRead(RESET) == LOW)
     {
       elapse++;
@@ -267,13 +269,24 @@ void loop()
     {
         elapsedTime = millis();
         displayTime();
+        /* A simple test to ensure that the Time gets adjusted if there is error
+         * test--;
+        if (test == 0)
+        {
+            int epoch = rtc.now().unixtime();
+            Serial.printf("Reading current Epoch: %d\n", epoch);
+            rtc.adjust(DateTime(epoch + 300));
+            Serial.printf("Time now is: %d:%d:%d\n", (rtc.now()).hour(), (rtc.now().minute()), (rtc.now().second()));
+
+        }*/
+
     }
   
     //try reconnecting to wiFi after 10 minutes
-    if ((storedNetworks > 0 && !bServer && (millis() - lastConnectTry) > WIFI_CONNECTION_MONITOR)||(WiFi.status() != WL_CONNECTED && bConnect)) //600000- 10 mins
+    if (!bConnect && (storedNetworks > 0 ) && !bServer && ((millis() - lastConnectTry) > WIFI_CONNECTION_MONITOR)) //600000- 10 mins
     {
         bConnect = false;
-        //Serial.println("Trying to reconnect Connect to LAN...");
+        //Serial.printf("Trying to reconnect Connect to LAN...\n");
         connectWifi();
         lastConnectTry = millis();
     }
@@ -306,6 +319,9 @@ void loop()
     }
     MonitorConfigPin();
     if (millis() - updateInterval > UPDATEINTERVAL)
-      NTPUpdate();
+    {
+        //Serial.printf("Calling NTP Update\n");
+        NTPUpdate();
+    }
  
 }

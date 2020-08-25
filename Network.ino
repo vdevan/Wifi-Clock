@@ -123,8 +123,13 @@ bool NTPUpdate()
       {
           delay(10);
           cb = ntpUDP.parsePacket();
-          if (timeout > 100) 
+          if (timeout > 100)
+          {
+              elapsedTime = millis();
+              updateInterval = millis();
+              //Serial.printf("NTP Timeout. Millis: %d\n", millis());
               return false; // timeout after 1000 ms
+          }
           timeout++;
       } while (cb == 0);
   
@@ -139,11 +144,16 @@ bool NTPUpdate()
       unsigned long epoch;
       epoch = secsSince1900 - seventyYears;
       epoch += pref.DSTZone;
-      epoch += (millis()-tick)/1000; //adjust the clock for time elapsed
+      if (millis() >= tick) // millis resets to zero every 40 days and may cause issues here. Check this 
+        epoch += (millis()-tick)/1000; //adjust the clock for time elapsed
+
+      //Serial.printf("Time before adjustment is: %d:%d:%d\n", (rtc.now()).hour(), (rtc.now().minute()), (rtc.now().second()));
       rtc.adjust(DateTime(epoch)); //Store the value in rtc
+      //Serial.printf("Time Adjust called. Epoc:%d\n",epoch);
+      //Serial.printf("Adjusted time now is: %d:%d:%d\n", (rtc.now()).hour(), (rtc.now().minute()), (rtc.now().second()));
+
     }
-        
     elapsedTime = millis();
     updateInterval = millis();
-
+    //Serial.printf("updateInterval: %d\n", updateInterval);
 }
