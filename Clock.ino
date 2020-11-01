@@ -96,7 +96,10 @@ int getDST(int Hour)
         return 1;        
   }
   
-  
+  //Not within DST range
+  if (currentMonth != currentDST.endMonth)
+    return 0;
+    
   //Current month is DST end month
   if (currentDate < currentDST.endDate)
     return 1;
