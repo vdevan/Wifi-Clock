@@ -78,8 +78,8 @@ void displayTime()
 int getDST(int Hour)
 {
   //Not yet reached DST month or past DST month
-  if (currentMonth < currentDST.startMonth && currentMonth > currentDST.endMonth)
-    return 0;
+  if (currentMonth > currentDST.startMonth || currentMonth < currentDST.endMonth)
+    return 1;
 
   //Current month is DST start month
   if (currentMonth == currentDST.startMonth)
@@ -88,30 +88,25 @@ int getDST(int Hour)
       return 0;
     if (currentDate > currentDST.startDate)
       return 1;
-    if (currentDate == currentDST.startDate)
-    {
-      if (Hour < currentDST.startTime)
+
+    //Current Date is DST start date
+    if (Hour < currentDST.startTime)
         return 0;
-      else
+    else
         return 1;        
-    }
   }
   
+  
   //Current month is DST end month
-  if (currentMonth == currentDST.endMonth)
-  {
-    if (currentDate < currentDST.endDate)
-      return 1;
-    if (currentDate > currentDST.endDate)
-      return 0;
-    if (currentDate == currentDST.endDate)
-    {
-      if (Hour < currentDST.endTime)
-        return 1;
-      else
-        return 0;        
-    }
-  }
+  if (currentDate < currentDST.endDate)
+    return 1;
+  if (currentDate > currentDST.endDate)
+    return 0;
+
+  //Current Date is DST start date
+  if (Hour < currentDST.endTime)
+    return 1;
+ 
   return 0;
 }
 
