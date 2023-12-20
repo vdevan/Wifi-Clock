@@ -156,4 +156,5 @@ bool NTPUpdate()
     elapsedTime = millis();
     updateInterval = millis();
     //Serial.printf("updateInterval: %d\n", updateInterval);
+    return true;
 }
