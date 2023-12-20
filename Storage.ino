@@ -11,7 +11,7 @@ void loadCredentials()
     offset += sizeof(valid);
 
     storedNetworks = 0;
-    for (int i; i < STORAGE; i++)
+    for (int i=0; i < STORAGE; i++)
     {
         EEPROM.get(offset, Networks[i]);
         offset += sizeof(NETWORK);
